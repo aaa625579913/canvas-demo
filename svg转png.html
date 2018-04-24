@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>将svg转成png</title>
+	</head>
+	<body style="overflow: hidden;">
+		<label for="input">第一步 选择本地svg文件:</label>
+		<input type="file" name="" id="input">
+		<p style="color: red">没有定义尺寸的矢量svg图会被转化为1920宽度(或者1080高度)的png图片,如果文件本身有大小设置就按照原大小转换(如果原始尺寸大于1920*1080将会被剪切)</p>
+
+		<div style="margin-top: 20px;">
+			预览:<img id="yulan" src="" style="max-width: 150px;max-height: 150px;vertical-align: middle; margin-left: 30px;" alt="还没传svg文件哦">
+		</div>
+
+		<div style="margin-top: 40px;">
+			<label for="output">点这里下载:</label>
+			<input type="button" name="" id="output" value="下载" disabled="disabled">
+			<p style="margin: 0">也可以右键点击下面的图片 ===>> "图片另存为"</p>
+		</div>
+
+		<canvas width="1920" height="1080" id="canvas" style="border: 2px solid red;transform: scale(0.5);transform-origin: 0 0;"></canvas>
+
+
+		<script type="text/javascript">
+
+			var out_img_data = "";
+			var out_img_name = "下载.png";
+
+			function draw(){
+			    var img = document.getElementById("yulan");
+		        var canvas = document.getElementById('canvas');
+		        var g = canvas.getContext('2d'); 
+		        g.clearRect(0, 0, 1920, 1080);
+		        g.drawImage(img, 0,0);
+		        setTimeout(function(){
+		        	out_img_data = canvas.toDataURL('image/png');
+		        },100);
+			}
+			function download(url, name) {
+			    const aLink = document.createElement('a');
+			    aLink.download = name;
+			    aLink.href = url;
+			    aLink.click();
+			}
+			window.onload = function(){
+
+				var yulan = document.getElementById("yulan");
+
+				var input = document.getElementById("input");
+				var output = document.getElementById("output");
+
+				input.onchange = function(){
+					var reader = new FileReader();
+					var url = this.files[0];
+					reader.readAsDataURL(url);
+					reader.onload = function(){
+						yulan.src = this.result;
+						output.disabled = false;
+						setTimeout(function(){
+							draw();
+						},100)
+								
+					}
+				}
+
+				output.onclick = function(){
+					download(out_img_data, out_img_name);
+				}
+
+			}
+			
+		</script>
+	</body>
+</html>

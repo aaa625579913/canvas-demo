@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>图片滤镜</title>
+		<style type="text/css">
+			canvas{
+				border: 4px solid red;
+				/*-webkit-transform-origin: 0 0;
+				-moz-transform-origin: 0 0;
+				-ms-transform-origin: 0 0;
+				-o-transform-origin: 0 0;
+				transform-origin: 0 0;
+				-webkit-transform: scale(0.5);
+				-moz-transform: scale(0.5);
+				-ms-transform: scale(0.5);
+				-o-transform: scale(0.5);
+				transform: scale(0.5);*/
+			}
+		</style>
+	</head>
+	<body>
+		<h1>图片滤镜</h1>
+		<h4>上传图片并选择下拉框中的滤镜,处理后右键下方图片另存为</h4>
+		<!-- <h4>上传图片并选择下拉框中的滤镜,处理后点击下载按钮下载</h4> -->
+		<label for="id">上传图片: </label>
+		<input type="file" name="" id="up">
+		<label for="view">图片预览: </label>
+		<img src="" id="view" alt="预览图" height="100">
+		<label for="sele" style="margin-left: 30px;">选择图片滤镜: </label>
+		<select id="sele" disabled="disabled">
+			<option value="yuantu">原图</option>
+			<option value="duizhe01">对折1</option>
+			<option value="duizhe02">对折2</option>
+			<option value="mirror">镜像反转</option>
+			<option value="gray">灰色调</option>
+			<option value="heibai">黑白</option>
+			<option value="heibai2">反色(黑白)</option>
+			<option value="inverse">反色(底片)</option>
+			<option value="rilievo">浮雕</option>
+			<option value="duibidu">高对比度</option>
+			<option value="lengse">冷色调</option>
+			<option value="nuanse">暖色调</option>
+			<option value="vague">模糊</option>
+			<option value="masaike">马赛克</option>
+			<option value="fangge">小方格</option>
+			<option value="shuiyin">水印</option>
+			<!-- <option value="unknown">未知</option> -->
+		</select>
+		<button id="downloadBtn" style="margin-left: 30px;display: none;">下载</button>
+		<hr>
+		<br>
+		<label for="view">滤镜效果: </label>
+		<canvas id="canvas" width="320" height="240"></canvas>
+
+
+		<script type="text/javascript">
+			var bg = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAIAAAABc2X6AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6QTUwQkU3RUY0M0I4MTFFODk3QzVDNDZBMDZBQ0VCOTEiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6QTUwQkU3RjA0M0I4MTFFODk3QzVDNDZBMDZBQ0VCOTEiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpBNTBCRTdFRDQzQjgxMUU4OTdDNUM0NkEwNkFDRUI5MSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpBNTBCRTdFRTQzQjgxMUU4OTdDNUM0NkEwNkFDRUI5MSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PmmsCdAAAAB4SURBVHja7NHBDQAwCAOx0sWByekYPOpbILISVXU2ysyV3Xs+CxgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBh4u5iZleHu9jAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAw8A89AQYA0h4IHGip57IAAAAASUVORK5CYII=";
+
+			var c = document.getElementById('canvas');
+			canvas.style.background = "url("+bg+") repeat";
+
+			
+
+			window.onload = function(){
+				var up = document.getElementById('up');
+				var sele = document.getElementById('sele');
+				var downloadBtn = document.getElementById('downloadBtn');
+				var view = document.getElementById('view');
+				var canvas = document.getElementById('canvas');
+				var ct = canvas.getContext('2d');
+
+				var len = 0;
+				var canvasData;
+				var canvasDataD;
+				var canvasData_old;
+
+				up.onchange = function(){
+					sele.disabled = false;
+					sele.value = "yuantu";
+					var file = this.files[0];
+					if(file.type.indexOf("image") !== -1){
+						var reader = new FileReader();
+						reader.readAsDataURL(file);
+						reader.onload = function(){
+							var href = this.result;
+							view.src = href;
+						}
+						view.onload = function(){
+							draw();
+						}
+					}else{
+						alert("只能上传图片哦!")
+					}
+				}
+
+				sele.onchange = function(){
+					var value = this.value;
+					switch(value){
+						case 'yuantu':
+							draw();
+							break;
+						case 'inverse':
+							inverse();
+							break;
+						case 'gray':
+							gray();
+							break;
+						case 'vague':
+							vague();
+							break;
+						case 'rilievo':
+							rilievo();
+							break;
+						case 'carving':
+							carving();
+							break;
+						case 'duizhe01':
+							duizhe01();
+							break;
+						case 'duizhe02':
+							duizhe02();
+							break;
+						case 'mirror':
+							mirror();
+							break;
+						case 'heibai':
+							heibai();
+							break;
+						case 'heibai2':
+							heibai2();
+							break;
+						case 'duibidu':
+							duibidu();
+							break;
+						case 'lengse':
+							lengse();
+							break;
+						case 'nuanse':
+							nuanse();
+							break;
+						case 'masaike':
+							masaike();
+							break;
+						case 'fangge':
+							fangge();
+							break;
+						case 'unknown':
+							unknown();
+							break;
+						case 'shuiyin':
+							shuiyin(300,200);
+							break;
+					}
+				}
+
+				downloadBtn.onclick = function(){
+					downloadFun(sele.value);
+				}
+
+				//下载事件
+				function downloadFun(name){
+					var alink = document.createElement('a');
+					var data = canvas.toDataURL('image/png');
+					alink.href = data;
+					alink.download = name+".png";
+					document.body.appendChild(alink);
+					setTimeout(function(){
+						alink.click();
+					},200)
+					document.body.removeChild(alink);
+				}
+
+				//原图渲染
+				function draw(){
+					let width = view.naturalWidth;
+					let height = view.naturalHeight;
+					canvas.width = width;
+					canvas.height = height;
+					ct.drawImage(view,0,0,width,height);
+				}
+
+				//获取canvas数据的方法
+				function getData(){
+					len = canvas.width * canvas.height * 4;
+					canvasData = ct.getImageData(0,0,canvas.width,canvas.height);
+					canvasDataD = canvasData.data;
+					canvasData_old = ct.getImageData(0,0,canvas.width,canvas.height);
+				}
+				function putData(data){
+					ct.putImageData(data,0,0);
+				}
+
+				//具体方法
+				//反色
+				function inverse(){
+					draw();
+					getData();
+					filter.inverseFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//灰色调
+				function gray(){
+					draw();
+					getData();
+					filter.grayFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//黑白
+				function heibai(){
+					draw();
+					getData();
+					filter.heibaiFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//反色黑白
+				function heibai2(){
+					draw();
+					getData();
+					filter.heibai2Fun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//浮雕
+				function rilievo(){
+					draw();
+					getData();
+					filter.rilievoFun(canvasData);
+					filter.grayFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//对折1
+				function duizhe01(){
+					draw();
+					getData();
+					filter.duizhe01Fun(canvasData);
+					putData(canvasData);
+				}
+				//对折2
+				function duizhe02(){
+					draw();
+					getData();
+					filter.duizhe02Fun(canvasData);
+					putData(canvasData);
+				}
+				//镜像反转
+				function mirror(){
+					draw();
+					getData();
+					filter.mirrorFun(canvasData);
+					putData(canvasData);
+				}
+				//高对比度
+				function duibidu(){
+					draw();
+					getData();
+					filter.duibiduFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//暖色
+				function nuanse(){
+					draw();
+					getData();
+					filter.nuanseFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//冷色
+				function lengse(){
+					draw();
+					getData();
+					filter.lengseFun(canvasDataD,len);
+					putData(canvasData);
+				}
+				//模糊
+				function vague(){
+					draw();
+					getData();
+					filter.vagueFun(canvasData,10);
+					putData(canvasData);
+				}
+				//马赛克
+				function masaike(){
+					draw();
+					getData();
+					filter.masaikeFun(canvasData,10);
+					putData(canvasData);
+				}
+				//方格
+				function fangge(){
+					draw();
+					getData();
+					filter.fanggeFun(canvasData);
+					putData(canvasData);
+				}
+				//水印
+				function shuiyin(w,h){
+					draw();
+					getData();
+					var width = canvasData.width;
+					var height = canvasData.height;
+					ct.font = "italic 40px Arial";
+					ct.fillStyle = "rgba(255,255,255,0.5)";
+					ct.shadowBlur = 50;
+					ct.shadowColor = "#fff";
+					for (var i = 50; i < width; i+=w) {
+						for (var j = 50; j < height; j+=h) {
+							ct.fillText("水印",i,j,200);
+						}
+					}
+				}
+				//未知
+				function unknown(){
+					draw();
+					getData();
+					filter.unknownFun(canvasData,10);
+					putData(canvasData);
+				}
+
+				//声明一个filter对象  存储滤镜相关方法
+				var filter = {
+					//反色
+					inverseFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							// data[i] = 255- data[i];
+			    			//data[i+1] = 255 - data[i+1];
+			    			//data[i+2] = 255 - data[i+2];
+			    			var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+							data[i] = (255-r);
+							data[i+1] = (255-g);
+							data[i+2] = (255-b);
+						}
+					},
+					//灰色调
+					grayFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = r*0.3+g*0.59+b*0.11;
+							data[i+1] = r*0.3+g*0.59+b*0.11;
+							data[i+2] = r*0.3+g*0.59+b*0.11;
+						}
+					},
+					//黑白
+					heibaiFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = ((r+g+b)/3 > 128) ? 255 : 0;
+							data[i+1] = ((r+g+b)/3 > 128) ? 255 : 0;
+							data[i+2] = ((r+g+b)/3 > 128) ? 255 : 0;
+						}
+					},
+					//反色黑白
+					heibai2Fun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = 255 - r;
+							data[i+1] = 255 - r;
+							data[i+2] = 255 - r;
+						}
+					},
+					//浮雕
+					rilievoFun : function(dataobj){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						for (var i = 0; i < width; i++) {
+							for (var j = 0; j < height; j++) {
+								var pre = (i-1+j*width)*4;
+								var ind = (i+j*width)*4;
+								var next = (i+1+j*width)*4;
+
+								dataobj.data[ind+0] = canvasData_old.data[next+0] - canvasData_old.data[pre+0] + 128;
+								dataobj.data[ind+1] = canvasData_old.data[next+1] - canvasData_old.data[pre+1] + 128;
+								dataobj.data[ind+2] = canvasData_old.data[next+2] - canvasData_old.data[pre+2] + 128;
+								//dataobj.data[ind+3] = 255;
+
+							}
+						}
+					},
+					//对折1
+					duizhe01Fun : function(dataobj){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						for (var i = 1; i <= width/2; i++) {
+							for (var j = 1; j <= height; j++) {
+								var chushi = ((j-1)*width+i)*4;
+								var mubiao = ((j-1)*width+(width-i))*4;
+
+								dataobj.data[mubiao+0] = dataobj.data[chushi+0];
+								dataobj.data[mubiao+1] = dataobj.data[chushi+1];
+								dataobj.data[mubiao+2] = dataobj.data[chushi+2];
+								dataobj.data[mubiao+3] = dataobj.data[chushi+3];
+
+							}
+						}
+					},
+					//对折2
+					duizhe02Fun : function(dataobj){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						for (var i = 1; i <= width/2; i++) {
+							for (var j = 1; j <= height; j++) {
+								var chushi = ((j-1)*width+i)*4;
+								var mubiao = ((j-1)*width+(width-i))*4;
+
+								dataobj.data[chushi+0] = dataobj.data[mubiao+0];
+								dataobj.data[chushi+1] = dataobj.data[mubiao+1];
+								dataobj.data[chushi+2] = dataobj.data[mubiao+2];
+								dataobj.data[mubiao+3] = dataobj.data[chushi+3];
+
+							}
+						}
+					},
+					//镜像反转
+					mirrorFun : function(dataobj){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						for (var i = 1; i <= width; i++) {
+							for (var j = 1; j <= height; j++) {
+								var chushi = ((j-1)*width+i)*4;
+								var mubiao = ((j-1)*width+(width-i))*4;
+								dataobj.data[mubiao+0] = canvasData_old.data[chushi+0];
+								dataobj.data[mubiao+1] = canvasData_old.data[chushi+1];
+								dataobj.data[mubiao+2] = canvasData_old.data[chushi+2];
+								dataobj.data[mubiao+3] = canvasData_old.data[chushi+3];
+							}
+						}
+					},
+					//高对比度
+					duibiduFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = r*1.25;
+							data[i+1] = g*1.25;
+							data[i+2] = b*1.25;
+						}
+					},
+					//暖色调
+					nuanseFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = r*1.05;
+							data[i+1] = g*0.95;
+							data[i+2] = b*0.9;
+						}
+					},
+					//冷色调
+					lengseFun : function(data,len){
+						for (var i = 0; i < len; i+=4) {
+							var r = data[i];
+							var g = data[i+1];
+							var b = data[i+2];
+
+							data[i] = r*0.9;
+							data[i+1] = g*0.95;
+							data[i+2] = b*1.05;
+						}
+					},
+					//模糊
+					vagueFun : function(imgData,radius,sigma) {
+					    var pixes = imgData.data;
+					    var width = imgData.width;
+					    var height = imgData.height;
+					    var gaussMatrix = [],
+					        gaussSum = 0,
+					        x, y,
+					        r, g, b, a,
+					        i, j, k, len;
+
+
+					    radius = Math.floor(radius) || 3;
+					    sigma = sigma || radius / 3;
+
+					    a = 1 / (Math.sqrt(2 * Math.PI) * sigma);
+					    b = -1 / (2 * sigma * sigma);
+					    //生成高斯矩阵
+					    for (i = 0, x = -radius; x <= radius; x++, i++){
+					        g = a * Math.exp(b * x * x);
+					        gaussMatrix[i] = g;
+					        gaussSum += g;
+
+					    }
+					    //归一化, 保证高斯矩阵的值在[0,1]之间
+					    for (i = 0, len = gaussMatrix.length; i < len; i++) {
+					        gaussMatrix[i] /= gaussSum;
+					    }
+					    //x 方向一维高斯运算
+					    for (y = 0; y < height; y++) {
+					        for (x = 0; x < width; x++) {
+					            r = g = b = a = 0;
+					            gaussSum = 0;
+					            for(j = -radius; j <= radius; j++){
+					                k = x + j;
+					                if(k >= 0 && k < width){//确保 k 没超出 x 的范围
+					                    //r,g,b,a 四个一组
+					                    i = (y * width + k) * 4;
+					                    r += pixes[i] * gaussMatrix[j + radius];
+					                    g += pixes[i + 1] * gaussMatrix[j + radius];
+					                    b += pixes[i + 2] * gaussMatrix[j + radius];
+					                    // a += pixes[i + 3] * gaussMatrix[j];
+					                    gaussSum += gaussMatrix[j + radius];
+					                }
+					            }
+					            i = (y * width + x) * 4;
+					            // 除以 gaussSum 是为了消除处于边缘的像素, 高斯运算不足的问题
+					            // console.log(gaussSum)
+					            pixes[i] = r / gaussSum;
+					            pixes[i + 1] = g / gaussSum;
+					            pixes[i + 2] = b / gaussSum;
+					            // pixes[i + 3] = a ;
+					        }
+					    }
+					    //y 方向一维高斯运算
+					    for (x = 0; x < width; x++) {
+					        for (y = 0; y < height; y++) {
+					            r = g = b = a = 0;
+					            gaussSum = 0;
+					            for(j = -radius; j <= radius; j++){
+					                k = y + j;
+					                if(k >= 0 && k < height){//确保 k 没超出 y 的范围
+					                    i = (k * width + x) * 4;
+					                    r += pixes[i] * gaussMatrix[j + radius];
+					                    g += pixes[i + 1] * gaussMatrix[j + radius];
+					                    b += pixes[i + 2] * gaussMatrix[j + radius];
+					                    // a += pixes[i + 3] * gaussMatrix[j];
+					                    gaussSum += gaussMatrix[j + radius];
+					                }
+					            }
+					            i = (y * width + x) * 4;
+					            pixes[i] = r / gaussSum;
+					            pixes[i + 1] = g / gaussSum;
+					            pixes[i + 2] = b / gaussSum;
+					            // pixes[i] = r ;
+					            // pixes[i + 1] = g ;
+					            // pixes[i + 2] = b ;
+					            // pixes[i + 3] = a ;
+					        }
+					    }
+					},
+					//马赛克
+					masaikeFun : function(dataobj,len){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						var data = dataobj.data;
+						var arr = [];
+						var r=0,g=0,b=0,a=0;
+						for (var i = 0; i < width; i+=len) {
+							for (var j = 0; j < height; j+=len) {
+								r=0;
+								g=0;
+								b=0;
+								arr = [];
+								for (var x = 0; x < len; x++) {
+									arr.push(data.slice((i+(j+x)*width)*4,(i+(j+x)*width+len)*4));
+								}
+								for (var x = 0; x < arr.length; x++) {
+									for (var y = 0; y < arr[x].length; y++) {
+										if((y-0) % 4 == 0){
+											r += arr[x][y];
+										}
+										if((y-1) % 4 == 0){
+											g += arr[x][y];
+										}
+										if((y-2) % 4 == 0){
+											b += arr[x][y];
+										}
+									}
+								}
+								r = r/(len*len);
+								g = g/(len*len);
+								b = b/(len*len);
+								for (var x = 0; x < len; x++) {
+									for (var y = 0; y < len; y++) {
+										data[(i+(j+x)*width+y)*4] = r;
+										data[(i+(j+x)*width+y)*4+1] = g;
+										data[(i+(j+x)*width+y)*4+2] = b;
+									}
+								}
+							}
+						}
+					},
+					//方格
+					fanggeFun : function(dataobj){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						var data = dataobj.data;
+						var arr = [];
+						var len = (Math.round(width/100) > 4) ? Math.round(width/100) : 4;
+						var r=0,g=0,b=0,a=0;
+						for (var i = 0; i < width; i+=len) {
+							for (var j = 0; j < height; j+=len) {
+								r=0;
+								g=0;
+								b=0;
+								arr = [];
+								for (var x = 0; x < len; x++) {
+									for (var y = 0; y < len; y++) {
+										if(x == 0 || y == 0){
+											data[(i+(j+x)*width+y)*4] = 200;
+											data[(i+(j+x)*width+y)*4+1] = 200;
+											data[(i+(j+x)*width+y)*4+2] = 200;
+											data[(i+(j+x)*width+y)*4+3] = 255;
+										}
+										if((x==0&&y==0)||(x==0&&y==len-1)||(y==0&&x==len-1)||(y==len-1&&x==len-1)){
+											data[(i+(j+x)*width+y)*4] = 0;
+											data[(i+(j+x)*width+y)*4+1] = 0;
+											data[(i+(j+x)*width+y)*4+2] = 0;
+											data[(i+(j+x)*width+y)*4+3] = 255;
+										}
+									}
+								}
+							}
+						}
+					},
+					//未知
+					unknownFun : function(dataobj,len){
+						var width = dataobj.width;
+						var height = dataobj.height;
+						var data = dataobj.data;
+						var arr = [];
+						var r=0,g=0,b=0,a=0;
+						for (var i = 0; i < width; i+=len) {
+							for (var j = 0; j < height; j+=len) {
+								r=0;
+								g=0;
+								b=0;
+								arr = [];
+								for (var x = 0; x < len; x++) {
+									arr.push(data.slice((i+(j+x)*width)*4,(i+(j+x)*width+len)*4));
+								}
+								for (var x = 0; x < arr.length; x++) {
+									for (var y = 0; y < arr[x].length; y++) {
+										if((y-0) % 4 == 0){
+											r += arr[x][y];
+										}
+										if((y-1) % 4 == 0){
+											g += arr[x][y];
+										}
+										if((y-2) % 4 == 0){
+											b += arr[x][y];
+										}
+									}
+								}
+								r = r/(len*len);
+								g = g/(len*len);
+								b = b/(len*len);
+								for (var x = 0; x < len; x++) {
+									for (var y = 0; y < len; y++) {
+										data[(i+(j+x)*width+y)*4] = r;
+										data[(i+(j+x)*width+y)*4+1] = g;
+										data[(i+(j+x)*width+y)*4+2] = b;
+									}
+								}
+							}
+						}
+					},
+				}
+			}
+
+		</script>
+	</body>
+</html>
