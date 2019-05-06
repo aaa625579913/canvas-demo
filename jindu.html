@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>前端进度</title>
+    <style>
+    	
+    </style>
+</head>
+<body>
+	<div id="yanggang" style="width: 1200px;height: 600px;"></div>
+
+
+
+	<script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts.min.js"></script>
+    <script>
+    	window.onload=function(){
+    		var yanggang = echarts.init(document.getElementById("yanggang"))
+    		var option = {
+    			color: ["#f00","#0f0","#00f"],
+    			title: {
+			        text: '工作进度'
+			    },
+			    tooltip: {
+			        trigger: 'axis'
+			    },
+			    legend: {
+			    	show: true,
+			        data:['杨钢','刘宇川','刘荣']
+			    },
+			    grid: {
+			        left: '3%',
+			        right: '4%',
+			        bottom: '3%',
+			        containLabel: true
+			    },
+			    toolbox: {
+			        feature: {
+			            saveAsImage: {}
+			        }
+			    },
+			    xAxis: {
+			        type: 'category',
+			        boundaryGap: false,
+			        data: ['5月6日','5月7日','5月8日','5月9日','5月13日','5月14日','5月15日','5月16日','5月17日','5月20日','5月21日','5月22日','5月23日','5月24日','5月27日']
+			    },
+			    yAxis: {
+			        type: 'value'
+			    },
+			    series: [
+			        {
+			            name:'杨钢',
+			            type:'line',
+			            markLine: {
+			            	show: true,
+			            	data:  [
+							    [
+							        {
+							            x: 65,
+							            y: 60
+							        },
+							        {
+							            x: 1150,
+							            y: 560
+							        }
+							    ]
+						    ],
+						    lineStyle: {
+						    	color: '#000'
+						    }
+			            },
+			            label: {
+			            	show: true,
+			            	position: 'top',
+			            	formatter: '{a}:{c}'
+			            },
+			            data:[136]
+			        },
+			        {
+			            name:'刘宇川',
+			            type:'line',
+			            label: {
+			            	show: true,
+			            	position: 'bottom',
+			            	formatter: '{a}:{c}'
+			            },
+			            data:[120]
+			        },
+			        {
+			            name:'刘荣',
+			            type:'line',
+			            label: {
+			            	show: true,
+			            	position: 'left',
+			            	formatter: '{a}:{c}'
+			            },
+			            data:[120]
+			        },
+			    ]
+    		}
+
+    		yanggang.setOption(option)
+    	}
+    </script>
+</body>
+</html>
