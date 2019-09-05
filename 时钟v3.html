@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>canvas特效</title>
+    <style type="text/css">
+	    html,
+	    body {
+	        overflow: hidden;
+	        margin: 0;
+	        padding: 0;
+	    }
+	    #canvasBG{
+	    	position: absolute;
+	    	left: 0;
+	    	top: 0;
+	    }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas">你的浏览器居然不支持Canvas？！赶快换一个吧！！</canvas>
+    <canvas id="canvasBG">你的浏览器居然不支持Canvas？！赶快换一个吧！！</canvas>
+    <script type="text/javascript">
+
+        let canvas = document.querySelector('#canvas')
+        let canvasBG = document.querySelector('#canvasBG')
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        canvasBG.width = window.innerWidth
+        canvasBG.height = window.innerHeight
+        let Xcenter = canvas.width / 2
+        let Ycenter = canvas.height / 2
+        let context = canvas.getContext('2d')
+        let contextBG = canvasBG.getContext('2d')
+        canvas.style.background = '#000'
+
+        const dateObj = [
+            {
+                key: 'YYYYLEN',
+                value: 6
+            },
+            {
+                key: 'MMLEN',
+                value: 12
+            },
+            {
+                key: 'DDLEN',
+                value: 0
+            },
+            {
+                key: 'hhLEN',
+                value: 24
+            },
+            {
+                key: 'mmLEN',
+                value: 60
+            },
+            {
+                key: 'ssLEN',
+                value: 60
+            },
+        ]
+
+        const radius1 = Xcenter>Ycenter ? Ycenter*0.1 : Xcenter*0.1
+        const radius2 = Xcenter>Ycenter ? Ycenter*0.3 : Xcenter*0.3
+        const radius3 = Xcenter>Ycenter ? Ycenter*0.4 : Xcenter*0.4
+        const radius4 = Xcenter>Ycenter ? Ycenter*0.5 : Xcenter*0.5
+        const radius5 = Xcenter>Ycenter ? Ycenter*0.6 : Xcenter*0.6
+        const radius6 = Xcenter>Ycenter ? Ycenter*0.7 : Xcenter*0.7
+        const radius7 = Xcenter>Ycenter ? Ycenter*0.8 : Xcenter*0.8
+
+        const LineColor = '#222'
+        const Font = '20px self'
+        const FontColor = '#999'
+        const FontShadowColor = '#fff'
+        const FontHighlightColor = '#fff'
+        
+        context.font = Font
+        contextBG.font = Font
+
+        function drawBG(){
+        	contextBG.clearRect(0,0,canvas.width,canvas.height)
+	        contextBG.translate(Xcenter,Ycenter)
+	        let now = new Date()
+	        let YYYY = now.getFullYear()
+	        let MM = now.getMonth() + 1
+	        let DD = now.getDate()
+	        let hh = now.getHours()
+	        let mm = now.getMinutes()
+	        let ss = now.getSeconds()
+	        let sss = now.getMilliseconds()
+
+	        if( MM === 4 || MM === 6 ||  MM === 9 ||  MM === 11 ){
+	            dateObj[2].value = 30
+	        }else if( MM === 2 ){
+	            if( YYYY % 4 === 0 ){
+	                dateObj[2].value = 29
+	            }else{
+	                dateObj[2].value = 28
+	            }
+	        }else{
+	            dateObj[2].value = 31
+	        }
+
+
+	        contextBG.lineWidth = 2
+	        contextBG.strokeStyle = LineColor
+	        for(let i = 1; i<7; i++){
+	            contextBG.beginPath()
+	            contextBG.arc(0, 0, eval('radius'+i), 0, Math.PI*2)
+	            contextBG.stroke()
+	        }
+
+	        
+	        for(let index = 0;index < dateObj.length-1;index++){
+	        	let item = dateObj[index]
+	            let key = eval(item.key.slice(0,-3))
+                for(let i = 0; i < item.value; i++){
+                    if(i === 0){
+                        contextBG.shadowColor = FontShadowColor
+                        contextBG.shadowBlur = 5
+                        contextBG.fillStyle = FontHighlightColor
+                    }else{
+                        contextBG.fillStyle = FontColor
+                    }
+                    let text = key - i
+                    if(text < 0){
+                        text += item.value
+                    }
+                    text = text < 10 ? '0'+text : text
+                    contextBG.fillText(text,eval('radius'+(index+1))+5,0)
+                    contextBG.rotate(-360/item.value * Math.PI / 180)                        
+                    contextBG.shadowColor = 'rgba(0,0,0,0)'
+                    contextBG.shadowBlur = 0
+                }
+	        }
+        	contextBG.translate(-Xcenter,-Ycenter)
+        }
+        function draw(){
+	        let now = new Date()
+	        let mmSS = now.getMinutes()
+	        let ssSS = now.getSeconds()
+        	let sssSS = now.getMilliseconds()
+
+        	if(ssSS === 0){
+        		drawBG()
+        	}
+
+	        context.clearRect(0,0,canvas.width,canvas.height)
+	        context.translate(Xcenter,Ycenter)
+        	let item = dateObj[5]
+            let offset = 360/item.value*sssSS/1000
+            context.rotate(-offset * Math.PI/180)
+            for(let i = 0; i < item.value; i++){
+                if(i === 0){
+                    context.shadowColor = FontShadowColor
+                    context.shadowBlur = 5
+                    context.fillStyle = FontHighlightColor
+                }else{
+                    context.fillStyle = FontColor
+                }
+                let text = ssSS - i
+                if(text < 0){
+                    text += item.value
+                }
+                text = text < 10 ? '0'+text : text
+                context.fillText(text,radius6+5,0)
+                context.rotate(-360/item.value * Math.PI / 180)
+                context.shadowColor = 'rgba(0,0,0,0)'
+                context.shadowBlur = 0
+                context.shadowOffsetY = 0
+                context.shadowOffsetX = 0
+            }
+            context.rotate(offset * Math.PI/180)
+        	context.translate(-Xcenter,-Ycenter)
+        	window.requestAnimationFrame(draw)
+        }
+        	
+        drawBG()
+        window.requestAnimationFrame(draw)
+
+    </script>
+</body>
+
+</html>

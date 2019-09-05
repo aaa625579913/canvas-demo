@@ -4,3 +4,6 @@
  - [svg图片转码png](https://wojiaoggyy.github.io/canvas-demo/svg转png.html)
  - [火车票生成](https://wojiaoggyy.github.io/canvas-demo/生成火车票.html)
  - [N多种canvas实现的图片滤镜效果](https://wojiaoggyy.github.io/canvas-demo/图片滤镜.html)
+ - [时钟v1](https://wojiaoggyy.github.io/canvas-demo/时钟v1.html)
+ - [时钟v2](https://wojiaoggyy.github.io/canvas-demo/时钟v2.html)
+ - [时钟v3](https://wojiaoggyy.github.io/canvas-demo/时钟v3.html)
