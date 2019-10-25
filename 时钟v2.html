@@ -85,7 +85,7 @@
             let MM = now.getMonth()
             let DD = now.getDate() - 1
             let hh = now.getHours()
-            let mm = now.getMinutes()
+            let mm = now.getMinutes() - 1
             let ss = now.getSeconds()
             let sss = now.getMilliseconds()
 
@@ -155,7 +155,7 @@
             context.translate(-Xcenter,-Ycenter)
         	window.requestAnimationFrame(draw)
         }
-        window.requestAnimationFrame(draw)
+        draw()
 
     </script>
 </body>
